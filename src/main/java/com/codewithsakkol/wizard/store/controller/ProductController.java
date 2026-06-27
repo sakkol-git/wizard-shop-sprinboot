@@ -13,6 +13,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.UUID;
+import jakarta.validation.Valid;
+import com.codewithsakkol.wizard.store.exceptions.ResourceNotFoundException;
 
 @RestController
 @RequestMapping("/products")
@@ -40,18 +42,14 @@ class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long id){
-        ProductDto productRespond = productMapper.toProductDto(productRepository.findById(id).orElse(null));
-        if (productRespond == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(productRespond);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+        return ResponseEntity.ok(productMapper.toProductDto(product));
     }
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody ProductDto requestProduct, UriComponentsBuilder uriBuilder){
-        Category category = categoryRepository.findById(requestProduct.getCategoryId()).orElse(null);
-        if (category == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDto requestProduct, UriComponentsBuilder uriBuilder){
+        Category category = categoryRepository.findById(requestProduct.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", requestProduct.getCategoryId()));
         Product product = productMapper.toProduct(requestProduct);
         product.setCategory(category);
         productRepository.save(product);
@@ -62,11 +60,9 @@ class ProductController {
     }
 
     @PutMapping("/{id}")
-    public  ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductDto requestProduct){
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null){
-            return  ResponseEntity.notFound().build();
-        }
+    public  ResponseEntity<?> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDto requestProduct){
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
         productMapper.update(requestProduct, product);
         productRepository.save(product);
@@ -76,10 +72,8 @@ class ProductController {
 
     @DeleteMapping("/{id}")
     public  ResponseEntity<?> deleteProduct(@PathVariable Long id){
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null){
-            return  ResponseEntity.notFound().build();
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         productRepository.delete(product);
         return  ResponseEntity.ok().build();
     }

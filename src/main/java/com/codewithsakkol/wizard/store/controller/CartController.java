@@ -5,9 +5,7 @@ import com.codewithsakkol.wizard.store.dtos.cart.CartDto;
 import com.codewithsakkol.wizard.store.dtos.cartItem.CartItemDto;
 import com.codewithsakkol.wizard.store.dtos.cartItem.UpdateCardItemRequest;
 import com.codewithsakkol.wizard.store.entities.Cart;
-import com.codewithsakkol.wizard.store.exceptions.CartItemNotFoundException;
-import com.codewithsakkol.wizard.store.exceptions.CartNotFoundException;
-import com.codewithsakkol.wizard.store.exceptions.ProductNotFoundException;
+import com.codewithsakkol.wizard.store.exceptions.ResourceNotFoundException;
 import com.codewithsakkol.wizard.store.mapper.CartMapper;
 import com.codewithsakkol.wizard.store.repositories.CartRepository;
 import com.codewithsakkol.wizard.store.repositories.ProductRepository;
@@ -18,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import jakarta.validation.Valid;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,7 +42,7 @@ class CartController {
     @PostMapping("/{cartId}/items")
     public ResponseEntity<CartItemDto> addToCard(
             @PathVariable UUID cartId,
-            @RequestBody AddToCardRequest addToCardRequest)
+            @Valid @RequestBody AddToCardRequest addToCardRequest)
     {
         var cartItemDto = cartService.addItemToCart(cartId, addToCardRequest.getProductId());
 
@@ -53,10 +52,8 @@ class CartController {
 
     @GetMapping("/{cardId}")
     public ResponseEntity<CartDto> getCart(@PathVariable UUID cardId) {
-        Cart cart = cartRepository.getCartWithItems(cardId).orElse(null);
-        if (cart == null) {
-            return  ResponseEntity.notFound().build();
-        }
+        Cart cart = cartRepository.getCartWithItems(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart", "id", cardId));
         return  ResponseEntity.ok(cartMapper.toCartDto(cart));
     }
 
@@ -64,7 +61,7 @@ class CartController {
     public ResponseEntity<?> updateCartItem(
             @PathVariable UUID cartId,
             @PathVariable Long productId,
-            @RequestBody UpdateCardItemRequest request){
+            @Valid @RequestBody UpdateCardItemRequest request){
         var cartDto = cartService.updateItem(cartId, productId, request.getQuantity());
 
         return  ResponseEntity.ok(cartDto);
@@ -85,26 +82,6 @@ class CartController {
     ){
         cartService.clearCart(cartId);
         return  ResponseEntity.noContent().build();
-
-    }
-
-    @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<Map<String , String>> handleCartNotFound() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", "Cart Not Founded"));
-    }
-
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<Map<String , String>> handleProductNotFound() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Product Not Founded in the cart"));
-    }
-
-
-    @ExceptionHandler(CartItemNotFoundException.class)
-    public ResponseEntity<Map<String , String>> handlePCartItemNotFound() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "CartItem Not Founded in the cart"));
 
     }
 

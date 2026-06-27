@@ -6,9 +6,7 @@ import com.codewithsakkol.wizard.store.dtos.cartItem.CartItemDto;
 import com.codewithsakkol.wizard.store.entities.Cart;
 import com.codewithsakkol.wizard.store.entities.CartItem;
 import com.codewithsakkol.wizard.store.entities.Product;
-import com.codewithsakkol.wizard.store.exceptions.CartItemNotFoundException;
-import com.codewithsakkol.wizard.store.exceptions.CartNotFoundException;
-import com.codewithsakkol.wizard.store.exceptions.ProductNotFoundException;
+import com.codewithsakkol.wizard.store.exceptions.ResourceNotFoundException;
 import com.codewithsakkol.wizard.store.mapper.CartMapper;
 import com.codewithsakkol.wizard.store.repositories.CartRepository;
 import com.codewithsakkol.wizard.store.repositories.ProductRepository;
@@ -32,14 +30,11 @@ public class CartService {
     }
 
     public CartItemDto addItemToCart(UUID cartId, Long productId){
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null) {
-           throw  new CartNotFoundException();
-        }
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            throw new ProductNotFoundException();
-        }
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart", "id", cartId));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
         var cartItem = cart.addItem(product);
         cartRepository.save(cart);
@@ -49,14 +44,12 @@ public class CartService {
     }
 
     public CartDto updateItem(UUID cartId, Long productId, int quantity){
-        var cart = cartRepository.getCartWithItems(cartId).orElse(null);
-        if (cart == null) {
-           throw new CartNotFoundException();
-        }
+        Cart cart = cartRepository.getCartWithItems(cartId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart", "id", cartId));
 
         CartItem cartItem = cart.getItem(productId);
         if (cartItem == null) {
-            throw new CartItemNotFoundException();
+            throw new ResourceNotFoundException("CartItem", "productId", productId);
         }
         cartItem.setQuantity(quantity);
         cartRepository.save(cart);
@@ -64,15 +57,13 @@ public class CartService {
         return  cartMapper.toCartDto(cart);
     }
 
-    public void  deleteItem(UUID cartId, Long productId){
-        var cart = cartRepository.getCartWithItems(cartId).orElse(null);
-        if (cart == null) {
-            throw new CartNotFoundException();
-        }
+    public void deleteItem(UUID cartId, Long productId){
+        Cart cart = cartRepository.getCartWithItems(cartId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart", "id", cartId));
 
         CartItem cartItem = cart.getItem(productId);
         if (cartItem == null) {
-            throw new CartItemNotFoundException();
+            throw new ResourceNotFoundException("CartItem", "productId", productId);
         }
 
         cart.removeItem(productId);
@@ -80,10 +71,8 @@ public class CartService {
     }
 
     public void clearCart(UUID cartId){
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null) {
-           throw  new CartNotFoundException();
-        }
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart", "id", cartId));
 
         cartRepository.delete(cart);
     }
