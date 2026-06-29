@@ -4,11 +4,13 @@ import com.codewithsakkol.wizard.store.dtos.user.RegisterUserRequest;
 import com.codewithsakkol.wizard.store.dtos.user.UpdateUserRequest;
 import com.codewithsakkol.wizard.store.dtos.user.UserRespond;
 import com.codewithsakkol.wizard.store.entities.User;
+import com.codewithsakkol.wizard.store.entities.enums.Rols;
 import com.codewithsakkol.wizard.store.mapper.UserMapper;
 import com.codewithsakkol.wizard.store.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,7 @@ class UserController {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
     @GetMapping
     public List<UserRespond> getAllUser(@RequestParam(required = false, defaultValue = "", name = "sort") String sort){
         if (!Set.of("name", "email").contains(sort)) sort = "name";
@@ -42,6 +45,8 @@ class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody RegisterUserRequest requestUser){
         User user = userMapper.toEntity(requestUser);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Rols.USER);
         userRepository.save(user);
         return ResponseEntity.ok(userMapper.userToUserDto(user));
     }
@@ -64,5 +69,7 @@ class UserController {
         userRepository.delete(user);
         return ResponseEntity.noContent().build();
     }
+
+    
 
 }

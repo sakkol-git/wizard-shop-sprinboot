@@ -9,12 +9,6 @@ spring:
     username: sakkol
     password: sakkol123
   jpa:
-    show-sql: true
-  profiles:
-    active:
-  jwt:
-    secret: o4qWeOSCLqYBtuTxBh1xTrV95FabYnNzRmgPstzb7QSrYRCPm10JXfICVpuh4nvva6fR6rXdG86pAkupZFCPJw==
-    accessTokenExpiration: 900
-    refreshTokenExpiration: 604800
+    show-sql: false
 server:
-  port: 8080
+  port: 8082

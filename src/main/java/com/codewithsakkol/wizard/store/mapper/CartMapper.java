@@ -12,6 +12,7 @@ public interface CartMapper {
     @Mapping(target = "items", source = "cartItems")
     @Mapping(target = "totalPrice", expression = "java(cart.getTotalPrice())")
     CartDto toCartDto(Cart cart);
+
     @Mapping(target = "totalPrice", expression = "java(cartItem.getTotalPrice())")
     CartItemDto toCartItemDto(CartItem cartItem);
 }
