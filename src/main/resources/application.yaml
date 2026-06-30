@@ -18,3 +18,9 @@ spring:
     refreshTokenExpiration: 604800
 server:
   port: 8080
+stripe:
+  secretKey: ${STRIPE_SECRET_KEY:}
+  publicKey: ${STRIPE_PUBLIC_KEY:}
+  webhookKey: ${STRIPE_WEBHOOK_KEY:}
+client:
+  url: http://localhost3000
