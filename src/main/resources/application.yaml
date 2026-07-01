@@ -13,9 +13,27 @@ spring:
   profiles:
     active:
   jwt:
-    secret: o4qWeOSCLqYBtuTxBh1xTrV95FabYnNzRmgPstzb7QSrYRCPm10JXfICVpuh4nvva6fR6rXdG86pAkupZFCPJw==
+    secret: ${JWT_SECRET:}
     accessTokenExpiration: 900
     refreshTokenExpiration: 604800
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_SECRET_ID:}
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope:
+              - email
+              - profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_SECRET_ID:}
+            redirect-uri: http://localhost:8080/login/oauth2/code/github
+            scope:
+              - email
+              - profile
 server:
   port: 8080
 stripe:

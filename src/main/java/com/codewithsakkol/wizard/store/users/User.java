@@ -1,5 +1,6 @@
 package com.codewithsakkol.wizard.store.users;
 
+import com.codewithsakkol.wizard.store.auth.oauth2.AuthProvider;
 import com.codewithsakkol.wizard.store.products.Product;
 
 
@@ -41,6 +42,15 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     @Builder.Default
     private List<Address> addresses = new ArrayList<>();
+
+    @Column(name = "provider")
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    // Note: Make password nullable if you want to support pure Google-only users
 
     public void addAddress(Address address) {
         addresses.add(address);

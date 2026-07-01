@@ -1,7 +1,6 @@
-package com.codewithsakkol.wizard.store.auth;
+package com.codewithsakkol.wizard.store.auth.jwt;
 
 import com.codewithsakkol.wizard.store.auth.TokenBlacklistRepository;
-import com.codewithsakkol.wizard.store.auth.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

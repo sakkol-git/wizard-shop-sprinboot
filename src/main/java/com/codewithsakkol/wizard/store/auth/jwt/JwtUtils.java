@@ -1,6 +1,5 @@
-package com.codewithsakkol.wizard.store.auth;
+package com.codewithsakkol.wizard.store.auth.jwt;
 
-import com.codewithsakkol.wizard.store.auth.JwtConfig;
 import com.codewithsakkol.wizard.store.users.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

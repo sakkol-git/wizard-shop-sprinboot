@@ -1,14 +1,12 @@
 package com.codewithsakkol.wizard.store.auth;
 
-import com.codewithsakkol.wizard.store.auth.JwtConfig;
-import com.codewithsakkol.wizard.store.auth.JwtRespond;
-import com.codewithsakkol.wizard.store.auth.LoginRequest;
+import com.codewithsakkol.wizard.store.auth.jwt.AuthJwtService;
+import com.codewithsakkol.wizard.store.auth.jwt.JwtConfig;
+import com.codewithsakkol.wizard.store.auth.jwt.JwtRespond;
 import com.codewithsakkol.wizard.store.users.UserRespond;
-import com.codewithsakkol.wizard.store.users.User;
 import com.codewithsakkol.wizard.store.users.UserMapper;
 import com.codewithsakkol.wizard.store.users.UserRepository;
-import com.codewithsakkol.wizard.store.auth.AuthService;
-import com.codewithsakkol.wizard.store.auth.JwtUtils;
+import com.codewithsakkol.wizard.store.auth.jwt.JwtUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -25,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthJwtService authJwtService;
     private final JwtUtils jwtUtils;
     private final JwtConfig jwtConfig;
     private final UserRepository userRepository; // Optional: Can move 'me()' logic to a UserService later
@@ -35,7 +32,7 @@ public class AuthController {
     public ResponseEntity<JwtRespond> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         log.info("Login attempt for email: {}", request.getEmail());
 
-        AuthService.AuthTokens tokens = authService.login(request);
+        AuthJwtService.AuthTokens tokens = authJwtService.login(request);
         setRefreshTokenCookie(response, tokens.refreshToken(), (int) (jwtConfig.getRefreshTokenExpiration() / 1000));
 
         return ResponseEntity.ok(new JwtRespond(tokens.accessToken()));
@@ -45,7 +42,7 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader, HttpServletResponse response) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            authService.logout(token);
+            authJwtService.logout(token);
         }
         
         // Clear refresh token cookie
@@ -56,7 +53,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserRespond> me() {
-        var user = authService.getCurrentUser();
+        var user = authJwtService.getCurrentUser();
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
@@ -81,7 +78,7 @@ public class AuthController {
         }
 
         try {
-            AuthService.AuthTokens tokens = authService.refreshTokens(refreshToken);
+            AuthJwtService.AuthTokens tokens = authJwtService.refreshTokens(refreshToken);
             // Optional: you can cycle the refresh token here by setting a new cookie
             return ResponseEntity.ok(new JwtRespond(tokens.accessToken()));
         } catch (RuntimeException e) {

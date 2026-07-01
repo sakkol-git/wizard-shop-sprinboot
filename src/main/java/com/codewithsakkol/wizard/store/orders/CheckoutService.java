@@ -1,25 +1,15 @@
 package com.codewithsakkol.wizard.store.orders;
 
 import com.codewithsakkol.wizard.store.carts.CartService;
-import com.codewithsakkol.wizard.store.auth.AuthService;
+import com.codewithsakkol.wizard.store.auth.jwt.AuthJwtService;
 
 
-import com.codewithsakkol.wizard.store.orders.CheckoutRequest;
-import com.codewithsakkol.wizard.store.orders.CheckoutRespond;
 import com.codewithsakkol.wizard.store.payments.WebhookRequest;
-import com.codewithsakkol.wizard.store.orders.Order;
-import com.codewithsakkol.wizard.store.payments.PaymentStatus;
 import com.codewithsakkol.wizard.store.common.PaymentException;
 import com.codewithsakkol.wizard.store.common.ResourceNotFoundException;
 import com.codewithsakkol.wizard.store.carts.CartRepository;
-import com.codewithsakkol.wizard.store.orders.OrderRepository;
 import com.codewithsakkol.wizard.store.payments.itf.PaymentGateway;
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CheckoutService {
 
     private final CartRepository cartRepository;
-    private final AuthService authService;
+    private final AuthJwtService authJwtService;
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final PaymentGateway paymentGateway;
@@ -42,7 +32,7 @@ public class CheckoutService {
         if (cart.getCartItems().isEmpty()) {
             throw new ResourceNotFoundException("Cart Items", "Is Empty", cart.getCartItems());
         }
-        var order = Order.fromCart(cart, authService.getCurrentUser());
+        var order = Order.fromCart(cart, authJwtService.getCurrentUser());
 
         orderRepository.save(order);
 

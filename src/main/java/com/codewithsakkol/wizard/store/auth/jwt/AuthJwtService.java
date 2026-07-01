@@ -1,15 +1,12 @@
-package com.codewithsakkol.wizard.store.auth;
+package com.codewithsakkol.wizard.store.auth.jwt;
 
+import com.codewithsakkol.wizard.store.auth.CustomUserDetails;
 import com.codewithsakkol.wizard.store.auth.LoginRequest;
-import com.codewithsakkol.wizard.store.users.User;
 import com.codewithsakkol.wizard.store.auth.TokenBlacklist;
 import com.codewithsakkol.wizard.store.auth.TokenBlacklistRepository;
+import com.codewithsakkol.wizard.store.users.User;
 import com.codewithsakkol.wizard.store.users.UserRepository;
-import com.codewithsakkol.wizard.store.auth.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import com.codewithsakkol.wizard.store.auth.CustomUserDetails;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +19,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthJwtService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
